@@ -1,5 +1,5 @@
 # mason-tool-installer
-Install, or upgrade, your third-party tools automatically on startup. 
+Install or upgrade your third-party tools automatically on startup. 
 
 Uses [Mason](https://github.com/williamboman/mason.nvim) to do nearly all the work. This is a simple plugin that
 helps users keep up-to-date with their tools and to make certain they have a consistent environment.
