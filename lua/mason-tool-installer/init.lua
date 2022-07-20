@@ -9,17 +9,21 @@ local setup = function(settings)
   SETTINGS = vim.tbl_deep_extend('force', SETTINGS, settings)
 end
 
+local show = function(msg)
+  vim.schedule_wrap(print(string.format('[mason-tool-installer] %s', msg)))
+end
+
 local do_install = function(p, version)
   if version ~= nil then
-    vim.schedule_wrap(print(string.format('%s: updating to %s', p.name, version)))
+    show(string.format('%s: updating to %s', p.name, version))
   else
-    vim.schedule_wrap(print(string.format('%s: installing', p.name)))
+    show(string.format('%s: installing', p.name))
   end
   p:on('install:success', function()
-    vim.schedule_wrap(print(string.format('%s: successfully installed', p.name)))
+    show(string.format('%s: successfully installed', p.name))
   end)
   p:on('install:failed', function()
-    vim.schedule_wrap(print(string.format('%s: failed to install', p.name)))
+    show(string.format('%s: failed to install', p.name))
   end)
   p:install { version = version }
 end
@@ -38,13 +42,11 @@ local check_install = function()
     if p:is_installed() then
       if version ~= nil then
         p:get_installed_version(function(ok, installed_version)
-          if ok then
-            if installed_version ~= version then
-              do_install(p, version)
-            end
+          if ok and installed_version ~= version then
+            do_install(p, version)
           end
         end)
-      elseif (auto_update == true) or (auto_update == nil and SETTINGS['auto_update']) then
+      elseif auto_update or (auto_update == nil and SETTINGS['auto_update']) then
         p:check_new_version(function(ok, version)
           if ok then
             do_install(p, version.latest_version)
@@ -52,7 +54,7 @@ local check_install = function()
         end)
       end
     else
-      do_install(p)
+      do_install(p, version)
     end
   end
 end
