@@ -25,10 +25,26 @@ local do_install = function(p, version)
 end
 
 local check_install = function()
-  for _, name in ipairs(SETTINGS['ensure_installed']) do
+  for _, item in ipairs(SETTINGS['ensure_installed']) do
+    local name, version, auto_update
+    if type(item) == 'table' then
+      name = item[1]
+      version = item.version
+      auto_update = item.auto_update
+    else
+      name = item
+    end
     local p = mr.get_package(name)
     if p:is_installed() then
-      if SETTINGS['auto_update'] then
+      if version ~= nil then
+        p:get_installed_version(function(ok, installed_version)
+          if ok then
+            if installed_version ~= version then
+              do_install(p, version)
+            end
+          end
+        end)
+      elseif (auto_update == true) or (auto_update == nil and SETTINGS['auto_update']) then
         p:check_new_version(function(ok, version)
           if ok then
             do_install(p, version.latest_version)
