@@ -13,6 +13,10 @@ local show = function(msg)
   vim.schedule_wrap(print(string.format('[mason-tool-installer] %s', msg)))
 end
 
+local show_error = function(msg)
+  vim.schedule_wrap(vim.api.nvim_err_writeln(string.format('[mason-tool-installer] %s', msg)))
+end
+
 local do_install = function(p, version)
   if version ~= nil then
     show(string.format('%s: updating to %s', p.name, version))
@@ -23,7 +27,7 @@ local do_install = function(p, version)
     show(string.format('%s: successfully installed', p.name))
   end)
   p:on('install:failed', function()
-    show(string.format('%s: failed to install', p.name))
+    show_error(string.format('%s: failed to install', p.name))
   end)
   p:install { version = version }
 end
