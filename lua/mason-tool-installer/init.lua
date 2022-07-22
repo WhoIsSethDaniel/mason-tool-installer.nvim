@@ -71,7 +71,7 @@ local run_on_start = function()
 end
 
 return {
-  auto_install = auto_install,
+  run_on_start = run_on_start,
   check_install = check_install,
   setup = setup,
 }
