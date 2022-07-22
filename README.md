@@ -1,16 +1,18 @@
 # mason-tool-installer
 
-Install or upgrade your third-party tools automatically on startup.
+Install or upgrade all of your third-party tools.
+
+Can run at startup or may be run manually via a command (see the [Configuration](#Configuration) section below).
 
 Uses [Mason](https://github.com/williamboman/mason.nvim) to do nearly all the work. This is a simple plugin that
 helps users keep up-to-date with their tools and to make certain they have a consistent environment.
 
-# Requirements
+## Requirements
 
 This plugin has the same requirements as [Mason](https://github.com/williamboman/mason.nvim). And, of course,
 this plugin requires that Mason be installed.
 
-# Installation
+## Installation
 
 Install using your favorite plugin manager.
 
@@ -27,9 +29,9 @@ cd <plugin dir>
 git clone https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 ```
 
-# Configuration
+## Configuration
 
-```
+```lua
 require'mason-tool-installer'.setup {
 
     -- a list of all tools you want to ensure are installed upon
@@ -65,10 +67,22 @@ require'mason-tool-installer'.setup {
 
     -- if set to true this will check each tool for updates. If updates
     -- are available the tool will be updated.
-    auto_update = false
+    -- Default: false
+    auto_update = false,
+
+    -- automatically install / update on startup. If set to false nothing
+    -- will happen on startup. You can use `:MasonToolsUpdate` to install
+    -- tools and check for updates.
+    -- Default: true
+    auto_install = true
 }
 ```
 
-# Suggestions / Complaints / Help
+## Commands
 
-Please feel free to start a [discussion](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim/discussions) or file a [bug report](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim/issues).
+`:MasonToolsUpdate` - install tools and update already installed tools
+
+## Suggestions / Complaints / Help
+
+Please feel free to start a [discussion](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim/discussions) or
+file a [bug report](https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim/issues).

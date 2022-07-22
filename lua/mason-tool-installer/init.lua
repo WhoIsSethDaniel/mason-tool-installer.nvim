@@ -3,6 +3,7 @@ local mr = require 'mason-registry'
 local SETTINGS = {
   ensure_installed = {},
   auto_update = false,
+  auto_install = true,
 }
 
 local setup = function(settings)
@@ -33,6 +34,7 @@ local do_install = function(p, version)
 end
 
 local check_install = function()
+  print 'check install'
   for _, item in ipairs(SETTINGS['ensure_installed']) do
     local name, version, auto_update
     if type(item) == 'table' then
@@ -63,7 +65,14 @@ local check_install = function()
   end
 end
 
+local auto_install = function()
+  if SETTINGS['auto_install'] then
+    check_install()
+  end
+end
+
 return {
+  auto_install = auto_install,
   check_install = check_install,
   setup = setup,
 }
