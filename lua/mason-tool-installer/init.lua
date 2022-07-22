@@ -3,7 +3,7 @@ local mr = require 'mason-registry'
 local SETTINGS = {
   ensure_installed = {},
   auto_update = false,
-  auto_install = true,
+  run_on_start = true,
 }
 
 local setup = function(settings)
@@ -64,8 +64,8 @@ local check_install = function()
   end
 end
 
-local auto_install = function()
-  if SETTINGS['auto_install'] then
+local run_on_start = function()
+  if SETTINGS['run_on_start'] then
     check_install()
   end
 end

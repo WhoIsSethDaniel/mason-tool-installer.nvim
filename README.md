@@ -74,7 +74,7 @@ require'mason-tool-installer'.setup {
     -- will happen on startup. You can use `:MasonToolsUpdate` to install
     -- tools and check for updates.
     -- Default: true
-    auto_install = true
+    run_on_start = true
 }
 ```
 
