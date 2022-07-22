@@ -34,7 +34,6 @@ local do_install = function(p, version)
 end
 
 local check_install = function()
-  print 'check install'
   for _, item in ipairs(SETTINGS['ensure_installed']) do
     local name, version, auto_update
     if type(item) == 'table' then
