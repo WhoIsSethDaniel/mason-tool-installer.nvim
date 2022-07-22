@@ -3,5 +3,5 @@ vim.api.nvim_create_autocmd({ 'VimEnter' }, {
 })
 
 vim.api.nvim_create_user_command('MasonToolsUpdate', function()
-  require('mason-tool-installer').check_install()
+  require('mason-tool-installer').check_install(true)
 end, { force = true })

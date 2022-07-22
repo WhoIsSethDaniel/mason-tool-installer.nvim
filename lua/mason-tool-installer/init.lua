@@ -33,7 +33,7 @@ local do_install = function(p, version)
   p:install { version = version }
 end
 
-local check_install = function()
+local check_install = function(do_update)
   for _, item in ipairs(SETTINGS['ensure_installed']) do
     local name, version, auto_update
     if type(item) == 'table' then
@@ -51,7 +51,7 @@ local check_install = function()
             do_install(p, version)
           end
         end)
-      elseif auto_update or (auto_update == nil and SETTINGS['auto_update']) then
+      elseif do_update or auto_update or (auto_update == nil and SETTINGS['auto_update']) then
         p:check_new_version(function(ok, version)
           if ok then
             do_install(p, version.latest_version)
