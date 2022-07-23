@@ -8,6 +8,11 @@ local SETTINGS = {
 
 local setup = function(settings)
   SETTINGS = vim.tbl_deep_extend('force', SETTINGS, settings)
+  vim.validate {
+    ensure_installed = { SETTINGS.ensure_installed, 'table', true },
+    auto_update = { SETTINGS.auto_update, 'boolean', true },
+    run_on_start = { SETTINGS.run_on_start, 'boolean', true },
+  }
 end
 
 local show = function(msg)
@@ -34,7 +39,7 @@ local do_install = function(p, version)
 end
 
 local check_install = function(do_update)
-  for _, item in ipairs(SETTINGS['ensure_installed']) do
+  for _, item in ipairs(SETTINGS['ensure_installed'] or {}) do
     local name, version, auto_update
     if type(item) == 'table' then
       name = item[1]
