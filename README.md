@@ -2,7 +2,7 @@
 
 Install or upgrade all of your third-party tools.
 
-Can run at startup or may be run manually via a command (see the [Configuration](#Configuration) section below).
+Can run at startup or may be run manually via a command (see the [Configuration](#configuration) section below).
 
 Uses [Mason](https://github.com/williamboman/mason.nvim) to do nearly all the work. This is a simple plugin that
 helps users keep up-to-date with their tools and to make certain they have a consistent environment.
