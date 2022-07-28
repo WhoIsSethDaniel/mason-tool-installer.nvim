@@ -4,6 +4,7 @@ local SETTINGS = {
   ensure_installed = {},
   auto_update = false,
   run_on_start = true,
+  start_delay = 0,
 }
 
 local setup = function(settings)
@@ -12,6 +13,7 @@ local setup = function(settings)
     ensure_installed = { SETTINGS.ensure_installed, 'table', true },
     auto_update = { SETTINGS.auto_update, 'boolean', true },
     run_on_start = { SETTINGS.run_on_start, 'boolean', true },
+    start_delay = { SETTINGS.start_delay, 'number', true },
   }
 end
 
@@ -39,7 +41,7 @@ local do_install = function(p, version)
 end
 
 local check_install = function(do_update)
-  for _, item in ipairs(SETTINGS['ensure_installed'] or {}) do
+  for _, item in ipairs(SETTINGS.ensure_installed or {}) do
     local name, version, auto_update
     if type(item) == 'table' then
       name = item[1]
@@ -56,7 +58,7 @@ local check_install = function(do_update)
             do_install(p, version)
           end
         end)
-      elseif do_update or auto_update or (auto_update == nil and SETTINGS['auto_update']) then
+      elseif do_update or auto_update or (auto_update == nil and SETTINGS.auto_update) then
         p:check_new_version(function(ok, version)
           if ok then
             do_install(p, version.latest_version)
@@ -70,8 +72,8 @@ local check_install = function(do_update)
 end
 
 local run_on_start = function()
-  if SETTINGS['run_on_start'] then
-    check_install()
+  if SETTINGS.run_on_start then
+    vim.defer_fn(check_install, SETTINGS.start_delay or 0)
   end
 end
 

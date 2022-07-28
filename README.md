@@ -75,6 +75,13 @@ require'mason-tool-installer'.setup {
     -- tools and check for updates.
     -- Default: true
     run_on_start = true
+
+    -- EXPERIMENTAL: may be removed!
+    -- set a delay (in ms) before the installation starts. This is only
+    -- effective if run_on_start is set to true.
+    -- e.g.: 5000 = 5 second delay, 10000 = 10 second delay, etc...
+    -- Default: 0
+    start_delay = 3000  -- 3 second delay
 }
 ```
 
