@@ -7,6 +7,9 @@ local SETTINGS = {
   start_delay = 0,
 }
 
+local updating = false
+local installing = {}
+
 local setup = function(settings)
   SETTINGS = vim.tbl_deep_extend('force', SETTINGS, settings)
   vim.validate {
@@ -15,6 +18,10 @@ local setup = function(settings)
     run_on_start = { SETTINGS.run_on_start, 'boolean', true },
     start_delay = { SETTINGS.start_delay, 'number', true },
   }
+end
+
+local is_installing = function()
+  return updating
 end
 
 local show = function(msg)
@@ -26,47 +33,62 @@ local show_error = function(msg)
 end
 
 local do_install = function(p, version)
+  local finish = function(f)
+    installing[p.name] = nil
+    installing[1] = installing[1] - 1
+    if installing[1] == 0 then
+      updating = false
+      show 'installation(s) complete'
+      vim.api.nvim_exec_autocmds('User MasonToolsInstallComplete', {})
+    end
+    f()
+  end
+
+  installing[p.name] = true
+  installing[1] = (installing[1] or 0) + 1
   if version ~= nil then
     show(string.format('%s: updating to %s', p.name, version))
   else
     show(string.format('%s: installing', p.name))
   end
   p:on('install:success', function()
-    show(string.format('%s: successfully installed', p.name))
+    finish(show(string.format('%s: successfully installed', p.name)))
   end)
   p:on('install:failed', function()
-    show_error(string.format('%s: failed to install', p.name))
+    finish(show_error(string.format('%s: failed to install', p.name)))
   end)
   p:install { version = version }
 end
 
 local check_install = function(do_update)
-  for _, item in ipairs(SETTINGS.ensure_installed or {}) do
-    local name, version, auto_update
-    if type(item) == 'table' then
-      name = item[1]
-      version = item.version
-      auto_update = item.auto_update
-    else
-      name = item
-    end
-    local p = mr.get_package(name)
-    if p:is_installed() then
-      if version ~= nil then
-        p:get_installed_version(function(ok, installed_version)
-          if ok and installed_version ~= version then
-            do_install(p, version)
-          end
-        end)
-      elseif do_update or auto_update or (auto_update == nil and SETTINGS.auto_update) then
-        p:check_new_version(function(ok, version)
-          if ok then
-            do_install(p, version.latest_version)
-          end
-        end)
+  if not is_installing() then
+    for _, item in ipairs(SETTINGS.ensure_installed or {}) do
+      local name, version, auto_update
+      if type(item) == 'table' then
+        name = item[1]
+        version = item.version
+        auto_update = item.auto_update
+      else
+        name = item
       end
-    else
-      do_install(p, version)
+      local p = mr.get_package(name)
+      if p:is_installed() then
+        if version ~= nil then
+          p:get_installed_version(function(ok, installed_version)
+            if ok and installed_version ~= version then
+              do_install(p, version)
+            end
+          end)
+        elseif do_update or auto_update or (auto_update == nil and SETTINGS.auto_update) then
+          p:check_new_version(function(ok, versions)
+            if ok then
+              do_install(p, versions.latest_version)
+            end
+          end)
+        end
+      else
+        do_install(p, version)
+      end
     end
   end
 end
