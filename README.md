@@ -67,7 +67,7 @@ require'mason-tool-installer'.setup {
 
     -- if set to true this will check each tool for updates. If updates
     -- are available the tool will be updated. This setting does not
-    -- affect :MasonToolsUpdate or :MasonToolsInstall
+    -- affect :MasonToolsUpdate or :MasonToolsInstall.
     -- Default: false
     auto_update = false,
 
@@ -88,6 +88,7 @@ require'mason-tool-installer'.setup {
 ## Commands
 
 `:MasonToolsInstall` - only installs tools that are missing or at the incorrect version
+
 `:MasonToolsUpdate` - install missing tools and update already installed tools
 
 ## Suggestions / Complaints / Help
