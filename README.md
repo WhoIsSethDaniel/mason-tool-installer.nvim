@@ -66,13 +66,14 @@ require'mason-tool-installer'.setup {
     },
 
     -- if set to true this will check each tool for updates. If updates
-    -- are available the tool will be updated.
+    -- are available the tool will be updated. This setting does not
+    -- affect :MasonToolsUpdate or :MasonToolsInstall
     -- Default: false
     auto_update = false,
 
     -- automatically install / update on startup. If set to false nothing
-    -- will happen on startup. You can use `:MasonToolsUpdate` to install
-    -- tools and check for updates.
+    -- will happen on startup. You can use :MasonToolsInstall or
+    -- :MasonToolsUpdate to install tools and check for updates.
     -- Default: true
     run_on_start = true
 
@@ -86,7 +87,8 @@ require'mason-tool-installer'.setup {
 
 ## Commands
 
-`:MasonToolsUpdate` - install tools and update already installed tools
+`:MasonToolsInstall` - only installs tools that are missing or at the incorrect version
+`:MasonToolsUpdate` - install missing tools and update already installed tools
 
 ## Suggestions / Complaints / Help
 
