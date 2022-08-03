@@ -33,9 +33,11 @@ local do_install = function(p, version)
   end
   p:on('install:success', function()
     show(string.format('%s: successfully installed', p.name))
+    p:clear_event_handlers()
   end)
   p:on('install:failed', function()
     show_error(string.format('%s: failed to install', p.name))
+    p:clear_event_handlers()
   end)
   p:install { version = version }
 end
