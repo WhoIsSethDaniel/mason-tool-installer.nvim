@@ -31,13 +31,11 @@ local do_install = function(p, version)
   else
     show(string.format('%s: installing', p.name))
   end
-  p:on('install:success', function()
+  p:once('install:success', function()
     show(string.format('%s: successfully installed', p.name))
-    p:clear_event_handlers()
   end)
-  p:on('install:failed', function()
+  p:once('install:failed', function()
     show_error(string.format('%s: failed to install', p.name))
-    p:clear_event_handlers()
   end)
   p:install { version = version }
 end
