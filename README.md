@@ -85,19 +85,6 @@ require'mason-tool-installer'.setup {
 }
 ```
 
-### Mason Configuration
-
-If you are using `mason-tool-installer` to pin versions of your packages you will want to turn off
-Mason's auto-update-on-open. This setting will auto-update tools when you use the `:Mason` window.
-
-```lua
-require'mason'.setup({
-    ui = {
-        check_outdated_packages_on_open = false,
-    }
-})
-```
-
 ## Commands
 
 `:MasonToolsInstall` - only installs tools that are missing or at the incorrect version
