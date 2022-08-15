@@ -81,7 +81,7 @@ require'mason-tool-installer'.setup {
     -- effective if run_on_start is set to true.
     -- e.g.: 5000 = 5 second delay, 10000 = 10 second delay, etc...
     -- Default: 0
-    start_delay = 3000  -- 3 second delay
+    start_delay = 3000,  -- 3 second delay
 }
 ```
 
