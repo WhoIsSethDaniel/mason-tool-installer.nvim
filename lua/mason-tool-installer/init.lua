@@ -71,7 +71,10 @@ local check_install = function(force_update)
       do_install(p, version)
     end
   end
-  vim.cmd 'doautocmd User MasonToolsUpdateCompleted'
+
+  if #vim.api.nvim_list_uis() == 0 then
+    vim.cmd 'doautocmd User MasonToolsUpdateCompleted'
+  end
 end
 
 local run_on_start = function()
