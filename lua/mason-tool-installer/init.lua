@@ -17,6 +17,8 @@ local setup = function(settings)
   }
 end
 
+local install_count = 0
+
 local show = function(msg)
   vim.schedule_wrap(print(string.format('[mason-tool-installer] %s', msg)))
 end
@@ -38,9 +40,12 @@ local do_install = function(p, version)
     show_error(string.format('%s: failed to install', p.name))
   end)
   p:install { version = version }
+  install_count = install_count + 1
 end
 
 local check_install = function(force_update)
+  install_count = 0
+
   for _, item in ipairs(SETTINGS.ensure_installed or {}) do
     local name, version, auto_update
     if type(item) == 'table' then
@@ -72,7 +77,7 @@ local check_install = function(force_update)
     end
   end
 
-  if #vim.api.nvim_list_uis() == 0 then
+  if install_count > 0 then
     vim.cmd 'doautocmd User MasonToolsUpdateCompleted'
   end
 end
