@@ -48,7 +48,8 @@ local check_install = function(force_update)
     if completed >= total then
       vim.api.nvim_exec_autocmds('User', {
         pattern = 'MasonToolsUpdateCompleted',
-        data = { packages = SETTINGS.ensure_installed },
+        -- 'data' doesn't work with < 0.8.0
+        -- data = { packages = SETTINGS.ensure_installed },
       })
     end
   end
