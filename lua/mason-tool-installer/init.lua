@@ -25,7 +25,7 @@ local show_error = function(msg)
   vim.schedule_wrap(vim.api.nvim_err_writeln(string.format('[mason-tool-installer] %s', msg)))
 end
 
-local do_install = function(p, version)
+local do_install = function(p, version, on_close)
   if version ~= nil then
     show(string.format('%s: updating to %s', p.name, version))
   else
@@ -37,10 +37,21 @@ local do_install = function(p, version)
   p:once('install:failed', function()
     show_error(string.format('%s: failed to install', p.name))
   end)
-  p:install { version = version }
+  p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
 end
 
 local check_install = function(force_update)
+  local completed = 0
+  local total = vim.tbl_count(SETTINGS.ensure_installed)
+  local on_close = function()
+    completed = completed + 1
+    if completed >= total then
+      vim.api.nvim_exec_autocmds('User', {
+        pattern = 'MasonToolsUpdateCompleted',
+        data = { packages = SETTINGS.ensure_installed },
+      })
+    end
+  end
   for _, item in ipairs(SETTINGS.ensure_installed or {}) do
     local name, version, auto_update
     if type(item) == 'table' then
@@ -55,7 +66,9 @@ local check_install = function(force_update)
       if version ~= nil then
         p:get_installed_version(function(ok, installed_version)
           if ok and installed_version ~= version then
-            do_install(p, version)
+            do_install(p, version, on_close)
+          else
+            completed = completed + 1
           end
         end)
       elseif
@@ -63,12 +76,16 @@ local check_install = function(force_update)
       then
         p:check_new_version(function(ok, version)
           if ok then
-            do_install(p, version.latest_version)
+            do_install(p, version.latest_version, on_close)
+          else
+            completed = completed + 1
           end
         end)
+      else
+        completed = completed + 1
       end
     else
-      do_install(p, version)
+      do_install(p, version, on_close)
     end
   end
 end
