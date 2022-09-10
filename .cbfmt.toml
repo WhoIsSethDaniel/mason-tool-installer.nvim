@@ -1,0 +1,4 @@
+[languages]
+lua = ["stylua -s -"] 
+go = ["gofumpt"]
+sh = ["shfmt -i=4 -ci -s -bn"]
