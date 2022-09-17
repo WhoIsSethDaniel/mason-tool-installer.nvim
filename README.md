@@ -39,7 +39,7 @@ require('mason-tool-installer').setup {
   ensure_installed = {
 
     -- you can pin a tool to a particular version
-    { 'golangci-lint', version = '1.47.0' },
+    { 'golangci-lint', version = 'v1.47.0' },
 
     -- you can turn off/on auto_update per tool
     { 'bash-language-server', auto_update = true },
