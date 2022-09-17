@@ -101,8 +101,8 @@ emitted named `MasonToolsUpdateCompleted`. To use this event you can setup an ev
     pattern = 'MasonToolsUpdateCompleted',
     callback = function()
       vim.schedule(function()
-        print 'mason-tool-installer has finished')
-      end
+        print 'mason-tool-installer has finished'
+      end)
     end,
   })
 ```
