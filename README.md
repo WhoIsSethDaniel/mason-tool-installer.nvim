@@ -100,7 +100,9 @@ emitted named `MasonToolsUpdateCompleted`. To use this event you can setup an ev
   vim.api.nvim_create_autocmd('User', {
     pattern = 'MasonToolsUpdateCompleted',
     callback = function()
-      vim.schedule(print 'mason-tool-installer has finished')
+      vim.schedule(function()
+        print 'mason-tool-installer has finished'
+      end)
     end,
   })
 ```
