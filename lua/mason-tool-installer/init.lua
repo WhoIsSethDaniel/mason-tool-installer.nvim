@@ -17,13 +17,13 @@ local setup = function(settings)
   }
 end
 
-local show = function(msg)
-  vim.schedule_wrap(print(string.format('[mason-tool-installer] %s', msg)))
-end
+local show = vim.schedule_wrap(function(msg)
+  print(string.format('[mason-tool-installer] %s', msg))
+end)
 
-local show_error = function(msg)
-  vim.schedule_wrap(vim.api.nvim_err_writeln(string.format('[mason-tool-installer] %s', msg)))
-end
+local show_error = vim.schedule_wrap(function(msg)
+  vim.api.nvim_err_writeln(string.format('[mason-tool-installer] %s', msg))
+end)
 
 local do_install = function(p, version, on_close)
   if version ~= nil then
