@@ -18,11 +18,11 @@ local setup = function(settings)
 end
 
 local show = vim.schedule_wrap(function(msg)
-  print(string.format('[mason-tool-installer] %s', msg))
+  vim.notify(string.format('[mason-tool-installer] %s', msg), vim.log.levels.INFO)
 end)
 
 local show_error = vim.schedule_wrap(function(msg)
-  vim.api.nvim_err_writeln(string.format('[mason-tool-installer] %s', msg))
+  vim.notify(string.format('[mason-tool-installer] %s', msg), vim.log.levels.ERROR)
 end)
 
 local do_install = function(p, version, on_close)
