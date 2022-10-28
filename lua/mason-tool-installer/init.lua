@@ -69,21 +69,22 @@ local check_install = function(force_update)
           if ok and installed_version ~= version then
             do_install(p, version, on_close)
           else
-            completed = completed + 1
+            vim.schedule(on_close)
           end
         end)
       elseif
-        force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
+        force_update
+        or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
       then
         p:check_new_version(function(ok, version)
           if ok then
             do_install(p, version.latest_version, on_close)
           else
-            completed = completed + 1
+            vim.schedule(on_close)
           end
         end)
       else
-        completed = completed + 1
+        vim.schedule(on_close)
       end
     else
       do_install(p, version, on_close)
