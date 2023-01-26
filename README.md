@@ -93,6 +93,22 @@ require('mason-tool-installer').setup {
 
 ## Events
 
+Prior to installing the first package `mason-tool-installer` will emit a user event named
+`MasonToolStartingInstall`. If there are no packages to install then no event will be emitted.
+This event will only be emitted once -- at the start of installing packages. To use this
+event you can setup an event handler like so:
+
+```lua
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'MasonToolsStartingInstall',
+    callback = function()
+      vim.schedule(function()
+        print 'mason-tool-installer is starting'
+      end)
+    end,
+  })
+```
+
 Upon completion of any `mason-tool-installer` initiated installation/update a user event will be
 emitted named `MasonToolsUpdateCompleted`. To use this event you can setup an event handler like so:
 
