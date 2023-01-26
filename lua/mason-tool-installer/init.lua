@@ -72,10 +72,12 @@ local do_install = function(p, version, on_close)
     show_error(string.format('%s: failed to install', p.name))
   end)
   if not installed then
-    vim.api.nvim_exec_autocmds('User', {
-      pattern = 'MasonToolsStartingInstall',
-    })
     installed = true
+    vim.schedule(function()
+      vim.api.nvim_exec_autocmds('User', {
+        pattern = 'MasonToolsStartingInstall',
+      })
+    end)
   end
   p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
 end
