@@ -82,6 +82,14 @@ require('mason-tool-installer').setup {
   -- e.g.: 5000 = 5 second delay, 10000 = 10 second delay, etc...
   -- Default: 0
   start_delay = 3000, -- 3 second delay
+
+  -- Only attempt to install if 'debounce_hours' number of hours has
+  -- elapsed since the last time Neovim was started. This stores a 
+  -- timestamp in a file named stdpath('data')/mason-tool-installer-debounce.
+  -- This is only relevant when you are using 'run_on_start'. It has no
+  -- effect when running manually via ':MasonToolsInstall' etc....
+  -- Default: nil
+  debounce_hours = 5, -- at least 5 hours between attempts to install/update
 }
 ```
 
@@ -94,7 +102,7 @@ require('mason-tool-installer').setup {
 ## Events
 
 Prior to installing the first package `mason-tool-installer` will emit a user event named
-`MasonToolStartingInstall`. If there are no packages to install then no event will be emitted.
+`MasonToolsStartingInstall`. If there are no packages to install then no event will be emitted.
 This event will only be emitted once -- at the start of installing packages. To use this
 event you can setup an event handler like so:
 
