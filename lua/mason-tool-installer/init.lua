@@ -5,6 +5,7 @@ local SETTINGS = {
   auto_update = false,
   run_on_start = true,
   start_delay = 0,
+  debounce_hours = nil,
 }
 
 local setup = function(settings)
@@ -14,7 +15,39 @@ local setup = function(settings)
     auto_update = { SETTINGS.auto_update, 'boolean', true },
     run_on_start = { SETTINGS.run_on_start, 'boolean', true },
     start_delay = { SETTINGS.start_delay, 'number', true },
+    debounce_hours = { SETTINGS.debounce_hours, 'number', true },
   }
+end
+
+local debounce_file = vim.fn.stdpath 'data' .. '/mason-tool-installer-debounce'
+
+local read_last_timestamp = function()
+  local f = io.open(debounce_file)
+  if f ~= nil then
+    local last = f:read()
+    f:close()
+    return last
+  end
+  return nil
+end
+
+local write_new_timestamp = function()
+  local f = assert(io.open(debounce_file, 'w+'))
+  f:write(os.time())
+  f:close()
+end
+
+local can_run = function(hours)
+  local last = read_last_timestamp()
+  if last == nil then
+    write_new_timestamp()
+    return true
+  end
+  if (os.time() - last) > hours * 3600 then
+    write_new_timestamp()
+    return true
+  end
+  return false
 end
 
 local show = vim.schedule_wrap(function(msg)
@@ -48,6 +81,10 @@ local do_install = function(p, version, on_close)
 end
 
 local check_install = function(force_update)
+  if not force_update and SETTINGS.debounce_hours ~= nil and not can_run(SETTINGS.debounce_hours) then
+    return
+  end
+  installed = false -- reset for triggered events
   local completed = 0
   local total = vim.tbl_count(SETTINGS.ensure_installed)
   local on_close = function()
