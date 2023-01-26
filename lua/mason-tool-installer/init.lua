@@ -25,6 +25,7 @@ local show_error = vim.schedule_wrap(function(msg)
   vim.notify(string.format('[mason-tool-installer] %s', msg), vim.log.levels.ERROR)
 end)
 
+local installed = false
 local do_install = function(p, version, on_close)
   if version ~= nil then
     show(string.format('%s: updating to %s', p.name, version))
@@ -37,6 +38,12 @@ local do_install = function(p, version, on_close)
   p:once('install:failed', function()
     show_error(string.format('%s: failed to install', p.name))
   end)
+  if not installed then
+    vim.api.nvim_exec_autocmds('User', {
+      pattern = 'MasonToolsStartingInstall',
+    })
+    installed = true
+  end
   p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
 end
 
@@ -73,8 +80,7 @@ local check_install = function(force_update)
           end
         end)
       elseif
-        force_update
-        or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
+        force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
       then
         p:check_new_version(function(ok, version)
           if ok then
