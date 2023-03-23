@@ -99,41 +99,48 @@ local check_install = function(force_update)
       })
     end
   end
-  for _, item in ipairs(SETTINGS.ensure_installed or {}) do
-    local name, version, auto_update
-    if type(item) == 'table' then
-      name = item[1]
-      version = item.version
-      auto_update = item.auto_update
-    else
-      name = item
-    end
-    local p = mr.get_package(name)
-    if p:is_installed() then
-      if version ~= nil then
-        p:get_installed_version(function(ok, installed_version)
-          if ok and installed_version ~= version then
-            do_install(p, version, on_close)
-          else
-            vim.schedule(on_close)
-          end
-        end)
-      elseif
-        force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
-      then
-        p:check_new_version(function(ok, version)
-          if ok then
-            do_install(p, version.latest_version, on_close)
-          else
-            vim.schedule(on_close)
-          end
-        end)
+  local ensure_installed = function()
+    for _, item in ipairs(SETTINGS.ensure_installed or {}) do
+      local name, version, auto_update
+      if type(item) == 'table' then
+        name = item[1]
+        version = item.version
+        auto_update = item.auto_update
       else
-        vim.schedule(on_close)
+        name = item
       end
-    else
-      do_install(p, version, on_close)
+      local p = mr.get_package(name)
+      if p:is_installed() then
+        if version ~= nil then
+          p:get_installed_version(function(ok, installed_version)
+            if ok and installed_version ~= version then
+              do_install(p, version, on_close)
+            else
+              vim.schedule(on_close)
+            end
+          end)
+        elseif
+          force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
+        then
+          p:check_new_version(function(ok, version)
+            if ok then
+              do_install(p, version.latest_version, on_close)
+            else
+              vim.schedule(on_close)
+            end
+          end)
+        else
+          vim.schedule(on_close)
+        end
+      else
+        do_install(p, version, on_close)
+      end
     end
+  end
+  if mr.refresh then
+    mr.refresh(ensure_installed)
+  else
+    ensure_installed()
   end
 end
 
