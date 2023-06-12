@@ -59,6 +59,7 @@ local show_error = vim.schedule_wrap(function(msg)
 end)
 
 local installed = false
+local installed_packages = {}
 local do_install = function(p, version, on_close)
   if version ~= nil then
     show(string.format('%s: updating to %s', p.name, version))
@@ -79,6 +80,7 @@ local do_install = function(p, version, on_close)
       })
     end)
   end
+  table.insert(installed_packages, p.name)
   p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
 end
 
@@ -87,16 +89,19 @@ local check_install = function(force_update)
     return
   end
   installed = false -- reset for triggered events
+  installed_packages = {} -- reset
   local completed = 0
   local total = vim.tbl_count(SETTINGS.ensure_installed)
   local on_close = function()
     completed = completed + 1
     if completed >= total then
-      vim.api.nvim_exec_autocmds('User', {
+      local event = {
         pattern = 'MasonToolsUpdateCompleted',
-        -- 'data' doesn't work with < 0.8.0
-        -- data = { packages = SETTINGS.ensure_installed },
-      })
+      }
+      if vim.fn.has 'nvim-0.8' == 1 then
+        event.data = installed_packages
+      end
+      vim.api.nvim_exec_autocmds('User', event)
     end
   end
   local ensure_installed = function()

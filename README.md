@@ -84,7 +84,7 @@ require('mason-tool-installer').setup {
   start_delay = 3000, -- 3 second delay
 
   -- Only attempt to install if 'debounce_hours' number of hours has
-  -- elapsed since the last time Neovim was started. This stores a 
+  -- elapsed since the last time Neovim was started. This stores a
   -- timestamp in a file named stdpath('data')/mason-tool-installer-debounce.
   -- This is only relevant when you are using 'run_on_start'. It has no
   -- effect when running manually via ':MasonToolsInstall' etc....
@@ -118,14 +118,17 @@ event you can setup an event handler like so:
 ```
 
 Upon completion of any `mason-tool-installer` initiated installation/update a user event will be
-emitted named `MasonToolsUpdateCompleted`. To use this event you can setup an event handler like so:
+emitted named `MasonToolsUpdateCompleted`. If you have at least neovim 0.8 the programs that were
+just installed or updated will be in the `data` element of the argument to the callback (see `
+:h nvim_create_autocmd` for much more information). To use this event you can setup an event handler
+like so:
 
 ```lua
   vim.api.nvim_create_autocmd('User', {
     pattern = 'MasonToolsUpdateCompleted',
-    callback = function()
+    callback = function(e)
       vim.schedule(function()
-        print 'mason-tool-installer has finished'
+        print(vim.inspect(e.data)) -- print the table that lists the programs that were installed
       end)
     end,
   })
