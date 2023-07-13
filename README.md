@@ -12,6 +12,9 @@ helps users keep up-to-date with their tools and to make certain they have a con
 This plugin has the same requirements as [Mason](https://github.com/williamboman/mason.nvim). And, of course,
 this plugin requires that Mason be installed.
 
+Optionally, [mason-lspconfig](https://github.com/williamboman/mason-lspconfig.nvim) can be installed for the
+option to use lspconfig names instead of Mason names.
+
 ## Installation
 
 Install using your favorite plugin manager.
@@ -30,6 +33,10 @@ git clone https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 ```
 
 ## Configuration
+
+When passing a list of tools to `ensure_installed`, `mason-tool-installer` is expecting Mason
+package names by default. If `mason-lspconfig` is installed, `mason-tool-installer` can accept
+`lspconfig` package names instead.
 
 ```lua
 require('mason-tool-installer').setup {

@@ -1,4 +1,6 @@
 local mr = require 'mason-registry'
+local ok_mlsp, mlsp = pcall(require, 'mason-lspconfig')
+if not ok_mlsp then mlsp = nil end
 
 local SETTINGS = {
   ensure_installed = {},
@@ -113,6 +115,9 @@ local check_install = function(force_update)
         auto_update = item.auto_update
       else
         name = item
+      end
+      if mlsp then
+        name = mlsp.get_mappings().lspconfig_to_mason[name] or name
       end
       local p = mr.get_package(name)
       if p:is_installed() then
