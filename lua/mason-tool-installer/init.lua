@@ -155,9 +155,30 @@ local check_install = function(force_update, sync)
       else
         name = item
       end
-
-      if condition ~= nil and not condition() then
-        vim.schedule(on_close)
+      if mlsp then
+        name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+      end
+      local p = mr.get_package(name)
+      if p:is_installed() then
+        local installed_version = p:get_installed_version()
+        if version ~= nil then
+          if installed_version ~= version then
+            do_install(p, version, on_close)
+          else
+            vim.schedule(on_close)
+          end
+        elseif
+          force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
+        then
+          local latest_version = p:get_latest_version()
+          if latest_version ~= installed_version then
+            do_install(p, latest_version, on_close)
+          else
+            vim.schedule(on_close)
+          end
+        else
+          vim.schedule(on_close)
+        end
       else
         if mlsp then
           name = mlsp.get_mappings().lspconfig_to_mason[name] or name
