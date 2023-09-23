@@ -1,6 +1,8 @@
 local mr = require 'mason-registry'
 local ok_mlsp, mlsp = pcall(require, 'mason-lspconfig')
-if not ok_mlsp then mlsp = nil end
+if not ok_mlsp then
+  mlsp = nil
+end
 
 local SETTINGS = {
   ensure_installed = {},
@@ -160,8 +162,33 @@ local run_on_start = function()
   end
 end
 
+local clean = function()
+  local expected = {}
+  for _, item in ipairs(SETTINGS.ensure_installed or {}) do
+    local name
+    if type(item) == 'table' then
+      name = item[1]
+    else
+      name = item
+    end
+    if mlsp then
+      name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+    end
+    table.insert(expected, name)
+  end
+
+  local all = mr.get_all_package_names()
+  for _, name in ipairs(all) do
+    if mr.is_installed(name) and not vim.tbl_contains(expected, name) then
+      vim.notify(string.format('[mason-tool-installer] uninstalling %s', name, vim.log.levels.INFO))
+      mr.get_package(name):uninstall()
+    end
+  end
+end
+
 return {
   run_on_start = run_on_start,
   check_install = check_install,
   setup = setup,
+  clean = clean,
 }
