@@ -106,6 +106,8 @@ require('mason-tool-installer').setup {
 
 `:MasonToolsUpdate` - install missing tools and update already installed tools
 
+`:MasonToolsClean` - remove installed packages that are not listed in `ensure_installed`
+
 ## Events
 
 Prior to installing the first package `mason-tool-installer` will emit a user event named
