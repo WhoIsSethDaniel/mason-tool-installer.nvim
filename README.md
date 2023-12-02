@@ -42,7 +42,7 @@ package names by default. If `mason-lspconfig` is installed, `mason-tool-install
 require('mason-tool-installer').setup {
 
   -- a list of all tools you want to ensure are installed upon
-  -- start; they should be the names Mason uses for each tool
+  -- start
   ensure_installed = {
 
     -- you can pin a tool to a particular version
