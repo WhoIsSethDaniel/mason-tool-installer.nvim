@@ -88,7 +88,8 @@ local do_install = function(p, version, on_close)
   p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
 end
 
-local check_install = function(force_update)
+local check_install = function(force_update, sync)
+  sync = sync or false
   if not force_update and SETTINGS.debounce_hours ~= nil and not can_run(SETTINGS.debounce_hours) then
     return
   end
@@ -96,6 +97,7 @@ local check_install = function(force_update)
   installed_packages = {} -- reset
   local completed = 0
   local total = vim.tbl_count(SETTINGS.ensure_installed)
+  local all_completed = false
   local on_close = function()
     completed = completed + 1
     if completed >= total then
@@ -106,6 +108,7 @@ local check_install = function(force_update)
         event.data = installed_packages
       end
       vim.api.nvim_exec_autocmds('User', event)
+      all_completed = true
     end
   end
   local ensure_installed = function()
@@ -153,6 +156,16 @@ local check_install = function(force_update)
     mr.refresh(ensure_installed)
   else
     ensure_installed()
+  end
+  if sync then
+    while true do
+      vim.wait(10000, function()
+        return all_completed
+      end)
+      if all_completed then
+        break
+      end
+    end
   end
 end
 
