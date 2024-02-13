@@ -55,11 +55,11 @@ local can_run = function(hours)
 end
 
 local show = vim.schedule_wrap(function(msg)
-  vim.notify(string.format('[mason-tool-installer] %s', msg), vim.log.levels.INFO)
+  vim.notify(msg, vim.log.levels.INFO, { title = 'mason-tool-installer' })
 end)
 
 local show_error = vim.schedule_wrap(function(msg)
-  vim.notify(string.format('[mason-tool-installer] %s', msg), vim.log.levels.ERROR)
+  vim.notify(msg, vim.log.levels.ERROR, { title = 'mason-tool-installer' })
 end)
 
 local installed = false
@@ -193,7 +193,7 @@ local clean = function()
   local all = mr.get_all_package_names()
   for _, name in ipairs(all) do
     if mr.is_installed(name) and not vim.tbl_contains(expected, name) then
-      vim.notify(string.format('[mason-tool-installer] uninstalling %s', name, vim.log.levels.INFO))
+      vim.notify(string.format('Uninstalling %s', name), vim.log.levels.INFO, { title = 'mason-tool-installer' })
       mr.get_package(name):uninstall()
     end
   end
