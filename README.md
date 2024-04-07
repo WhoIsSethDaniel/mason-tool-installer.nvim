@@ -12,8 +12,13 @@ helps users keep up-to-date with their tools and to make certain they have a con
 This plugin has the same requirements as [Mason](https://github.com/williamboman/mason.nvim). And, of course,
 this plugin requires that Mason be installed.
 
-Optionally, [mason-lspconfig](https://github.com/williamboman/mason-lspconfig.nvim) can be installed for the
-option to use lspconfig names instead of Mason names.
+Optionally:
+-   [mason-lspconfig](https://github.com/williamboman/mason-lspconfig.nvim) can be installed for the
+    option to use lspconfig names instead of Mason names.
+-   [mason-null-ls](https://github.com/jay-babu/mason-null-ls.nvim) can be installed for the
+    option to use null-ls names instead of Mason names.
+-   [mason-nvim-dap](https://github.com/jay-babu/mason-nvim-dap.nvim) can be installed for the
+    option to use nvim-dap names instead of Mason names.
 
 ## Installation
 
@@ -35,8 +40,13 @@ git clone https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 ## Configuration
 
 When passing a list of tools to `ensure_installed`, `mason-tool-installer` is expecting Mason
-package names by default. If `mason-lspconfig` is installed, `mason-tool-installer` can accept
-`lspconfig` package names instead.
+package names by default.
+
+If `mason-lspconfig` is installed, `mason-tool-installer` can accept `lspconfig` package names.
+
+If `mason-null-ls` is installed, `mason-tool-installer` can accept `null-ls` package names.
+
+If `mason-nvim-dap` is installed, `mason-tool-installer` can aceept `nvim-dap` package names.
 
 ```lua
 require('mason-tool-installer').setup {
