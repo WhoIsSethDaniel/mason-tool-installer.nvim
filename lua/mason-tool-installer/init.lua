@@ -1,7 +1,18 @@
 local mr = require 'mason-registry'
+
 local ok_mlsp, mlsp = pcall(require, 'mason-lspconfig')
 if not ok_mlsp then
   mlsp = nil
+end
+
+local ok_mnls, mnls = pcall(require, 'mason-null-ls.mappings.source')
+if not ok_mnls then
+  mnls = nil
+end
+
+local ok_mdap, mdap = pcall(require, 'mason-nvim-dap.mappings.source')
+if not ok_mdap then
+  mdap = nil
 end
 
 local SETTINGS = {
@@ -123,6 +134,12 @@ local check_install = function(force_update, sync)
       end
       if mlsp then
         name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+      end
+      if mnls then
+        name = mnls.getPackageFromNullLs(name) or name
+      end
+      if mdap then
+        name = mdap.nvim_dap_to_package[name] or name
       end
       local p = mr.get_package(name)
       if p:is_installed() then
