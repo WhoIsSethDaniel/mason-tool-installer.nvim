@@ -46,7 +46,7 @@ If `mason-lspconfig` is installed, `mason-tool-installer` can accept `lspconfig`
 
 If `mason-null-ls` is installed, `mason-tool-installer` can accept `null-ls` package names.
 
-If `mason-nvim-dap` is installed, `mason-tool-installer` can aceept `nvim-dap` package names.
+If `mason-nvim-dap` is installed, `mason-tool-installer` can accept `nvim-dap` package names.
 
 ```lua
 require('mason-tool-installer').setup {
