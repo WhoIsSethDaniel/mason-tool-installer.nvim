@@ -1,19 +1,6 @@
 local mr = require 'mason-registry'
 
-local ok_mlsp, mlsp = pcall(require, 'mason-lspconfig')
-if not ok_mlsp then
-  mlsp = nil
-end
-
-local ok_mnls, mnls = pcall(require, 'mason-null-ls.mappings.source')
-if not ok_mnls then
-  mnls = nil
-end
-
-local ok_mdap, mdap = pcall(require, 'mason-nvim-dap.mappings.source')
-if not ok_mdap then
-  mdap = nil
-end
+local mlsp, mnls, mdap
 
 local SETTINGS = {
   ensure_installed = {},
@@ -21,7 +8,35 @@ local SETTINGS = {
   run_on_start = true,
   start_delay = 0,
   debounce_hours = nil,
+  integrations = {
+    ['mason-lspconfig'] = true,
+    ['mason-null-ls'] = true,
+    ['mason-nvim-dap'] = true,
+  },
 }
+
+local setup_integrations = function()
+  if SETTINGS.integrations['mason-lspconfig'] then
+    local ok_mlsp, mlsp_mod = pcall(require, 'mason-lspconfig')
+    if ok_mlsp then
+      mlsp = mlsp_mod
+    end
+  end
+
+  if SETTINGS.integrations['mason-null-ls'] then
+    local ok_mnls, mnls_mod = pcall(require, 'mason-null-ls.mappings.source')
+    if ok_mnls then
+      mnls = mnls_mod
+    end
+  end
+
+  if SETTINGS.integrations['mason-nvim-dap'] then
+    local ok_mdap, mdap_mod = pcall(require, 'mason-nvim-dap.mappings.source')
+    if ok_mdap then
+      mdap = mdap_mod
+    end
+  end
+end
 
 local setup = function(settings)
   SETTINGS = vim.tbl_deep_extend('force', SETTINGS, settings)
@@ -31,7 +46,14 @@ local setup = function(settings)
     run_on_start = { SETTINGS.run_on_start, 'boolean', true },
     start_delay = { SETTINGS.start_delay, 'number', true },
     debounce_hours = { SETTINGS.debounce_hours, 'number', true },
+    integrations = { SETTINGS.integrations, 'table', true },
   }
+  vim.validate {
+    ['mason-lspconfig'] = { SETTINGS.integrations['mason-lspconfig'], 'boolean', true },
+    ['mason-null-ls'] = { SETTINGS.integrations['mason-null-ls'], 'boolean', true },
+    ['mason-nvim-dap'] = { SETTINGS.integrations['mason-nvim-dap'], 'boolean', true },
+  }
+  setup_integrations()
 end
 
 local debounce_file = vim.fn.stdpath 'data' .. '/mason-tool-installer-debounce'

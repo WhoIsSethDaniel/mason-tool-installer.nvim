@@ -42,11 +42,11 @@ git clone https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 When passing a list of tools to `ensure_installed`, `mason-tool-installer` is expecting Mason
 package names by default.
 
-If `mason-lspconfig` is installed, `mason-tool-installer` can accept `lspconfig` package names.
+If `mason-lspconfig` is installed, `mason-tool-installer` can accept `lspconfig` package names unless the integration is disabled.
 
-If `mason-null-ls` is installed, `mason-tool-installer` can accept `null-ls` package names.
+If `mason-null-ls` is installed, `mason-tool-installer` can accept `null-ls` package names unless the integration is disabled.
 
-If `mason-nvim-dap` is installed, `mason-tool-installer` can accept `nvim-dap` package names.
+If `mason-nvim-dap` is installed, `mason-tool-installer` can accept `nvim-dap` package names unless the integration is disabled.
 
 ```lua
 require('mason-tool-installer').setup {
@@ -107,6 +107,15 @@ require('mason-tool-installer').setup {
   -- effect when running manually via ':MasonToolsInstall' etc....
   -- Default: nil
   debounce_hours = 5, -- at least 5 hours between attempts to install/update
+
+  -- Disable integration with other Mason plugins. This removes
+  -- the ability to to use the alternative names of packages provided
+  -- by these plugins but disables them from immediately becoming loaded
+  integrations = {
+    ["mason-lspconfig"] = true,
+    ["mason-null-ls"] = true,
+    ["mason-nvim-dap"] = true,
+  }
 }
 ```
 
