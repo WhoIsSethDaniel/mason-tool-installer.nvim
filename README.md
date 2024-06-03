@@ -13,6 +13,7 @@ This plugin has the same requirements as [Mason](https://github.com/williamboman
 this plugin requires that Mason be installed.
 
 Optionally:
+
 -   [mason-lspconfig](https://github.com/williamboman/mason-lspconfig.nvim) can be installed for the
     option to use lspconfig names instead of Mason names.
 -   [mason-null-ls](https://github.com/jay-babu/mason-null-ls.nvim) can be installed for the
@@ -108,14 +109,18 @@ require('mason-tool-installer').setup {
   -- Default: nil
   debounce_hours = 5, -- at least 5 hours between attempts to install/update
 
-  -- Disable integration with other Mason plugins. This removes
-  -- the ability to to use the alternative names of packages provided
-  -- by these plugins but disables them from immediately becoming loaded
+  -- By default all integrations are enabled. If you turn on an integration
+  -- and you have the required module(s) installed this means you can use
+  -- alternative names, supplied by the modules, for the thing that you want
+  -- to install. If you turn off the integration (by setting it to false) you
+  -- cannot use these alternative names. It also suppresses loading of those
+  -- module(s) (assuming any are installed) which is sometimes wanted when
+  -- doing lazy loading.
   integrations = {
-    ["mason-lspconfig"] = true,
-    ["mason-null-ls"] = true,
-    ["mason-nvim-dap"] = true,
-  }
+    ['mason-lspconfig'] = true,
+    ['mason-null-ls'] = true,
+    ['mason-nvim-dap'] = true,
+  },
 }
 ```
 
