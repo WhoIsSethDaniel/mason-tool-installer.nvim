@@ -146,48 +146,54 @@ local check_install = function(force_update, sync)
   end
   local ensure_installed = function()
     for _, item in ipairs(SETTINGS.ensure_installed or {}) do
-      local name, version, auto_update
+      local name, version, auto_update, condition
       if type(item) == 'table' then
         name = item[1]
         version = item.version
         auto_update = item.auto_update
+        condition = item.condition
       else
         name = item
       end
-      if mlsp then
-        name = mlsp.get_mappings().lspconfig_to_mason[name] or name
-      end
-      if mnls then
-        name = mnls.getPackageFromNullLs(name) or name
-      end
-      if mdap then
-        name = mdap.nvim_dap_to_package[name] or name
-      end
-      local p = mr.get_package(name)
-      if p:is_installed() then
-        if version ~= nil then
-          p:get_installed_version(function(ok, installed_version)
-            if ok and installed_version ~= version then
-              do_install(p, version, on_close)
-            else
-              vim.schedule(on_close)
-            end
-          end)
-        elseif
-          force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
-        then
-          p:check_new_version(function(ok, version)
-            if ok then
-              do_install(p, version.latest_version, on_close)
-            else
-              vim.schedule(on_close)
-            end
-          end)
-        else
-          vim.schedule(on_close)
-        end
+
+      if condition ~= nil and not condition() then
+        vim.schedule(on_close)
       else
-        do_install(p, version, on_close)
+        if mlsp then
+          name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+        end
+        if mnls then
+          name = mnls.getPackageFromNullLs(name) or name
+        end
+        if mdap then
+          name = mdap.nvim_dap_to_package[name] or name
+        end
+        local p = mr.get_package(name)
+        if p:is_installed() then
+          if version ~= nil then
+            p:get_installed_version(function(ok, installed_version)
+              if ok and installed_version ~= version then
+                do_install(p, version, on_close)
+              else
+                vim.schedule(on_close)
+              end
+            end)
+          elseif
+            force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
+          then
+            p:check_new_version(function(ok, version)
+              if ok then
+                do_install(p, version.latest_version, on_close)
+              else
+                vim.schedule(on_close)
+              end
+            end)
+          else
+            vim.schedule(on_close)
+          end
+        else
+          do_install(p, version, on_close)
+        end
       end
     end
   end
