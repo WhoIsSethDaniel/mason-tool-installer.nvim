@@ -118,7 +118,9 @@ local do_install = function(p, version, on_close)
     end)
   end
   table.insert(installed_packages, p.name)
-  p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
+  if not p:is_installing() then
+    p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
+  end
 end
 
 local check_install = function(force_update, sync)
@@ -170,24 +172,22 @@ local check_install = function(force_update, sync)
         end
         local p = mr.get_package(name)
         if p:is_installed() then
+          local installed_version = p:get_installed_version()
           if version ~= nil then
-            p:get_installed_version(function(ok, installed_version)
-              if ok and installed_version ~= version then
-                do_install(p, version, on_close)
-              else
-                vim.schedule(on_close)
-              end
-            end)
+            if installed_version ~= version then
+              do_install(p, version, on_close)
+            else
+              vim.schedule(on_close)
+            end
           elseif
             force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
           then
-            p:check_new_version(function(ok, version)
-              if ok then
-                do_install(p, version.latest_version, on_close)
-              else
-                vim.schedule(on_close)
-              end
-            end)
+            local latest_version = p:get_latest_version()
+            if installed_version ~= latest_version then
+              do_install(p, latest_version, on_close)
+            else
+              vim.schedule(on_close)
+            end
           else
             vim.schedule(on_close)
           end
