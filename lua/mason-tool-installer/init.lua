@@ -15,6 +15,8 @@ local SETTINGS = {
   },
 }
 
+local IS_V1 = require('mason.version').MAJOR_VERSION == 1
+
 local setup_integrations = function()
   if SETTINGS.integrations['mason-lspconfig'] then
     local ok_mlsp, mlsp_mod = pcall(require, 'mason-lspconfig')
@@ -118,8 +120,12 @@ local do_install = function(p, version, on_close)
     end)
   end
   table.insert(installed_packages, p.name)
-  if not p:is_installing() then
+  if IS_V1 then
     p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
+  else
+    if not p:is_installing() then
+      p:install({ version = version }, vim.schedule_wrap(on_close))
+    end
   end
 end
 
@@ -172,21 +178,40 @@ local check_install = function(force_update, sync)
         end
         local p = mr.get_package(name)
         if p:is_installed() then
-          local installed_version = p:get_installed_version()
           if version ~= nil then
-            if installed_version ~= version then
-              do_install(p, version, on_close)
+            if IS_V1 then
+              p:get_installed_version(function(ok, installed_version)
+                if ok and installed_version ~= version then
+                  do_install(p, version, on_close)
+                else
+                  vim.schedule(on_close)
+                end
+              end)
             else
-              vim.schedule(on_close)
+              if p:get_installed_version() ~= version then
+                do_install(p, version, on_close)
+              else
+                vim.schedule(on_close)
+              end
             end
           elseif
             force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
           then
-            local latest_version = p:get_latest_version()
-            if installed_version ~= latest_version then
-              do_install(p, latest_version, on_close)
+            if IS_V1 then
+              p:check_new_version(function(ok, version)
+                if ok then
+                  do_install(p, version.latest_version, on_close)
+                else
+                  vim.schedule(on_close)
+                end
+              end)
             else
-              vim.schedule(on_close)
+              local latest_version = p:get_latest_version()
+              if p:get_installed_version() ~= latest_version then
+                do_install(p, latest_version, on_close)
+              else
+                vim.schedule(on_close)
+              end
             end
           else
             vim.schedule(on_close)
