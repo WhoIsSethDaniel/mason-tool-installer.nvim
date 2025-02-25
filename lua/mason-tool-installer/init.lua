@@ -2,6 +2,8 @@ local mr = require 'mason-registry'
 
 local mlsp, mnls, mdap
 
+local IS_V1 = require('mason.version').MAJOR_VERSION == 1
+
 local SETTINGS = {
   ensure_installed = {},
   auto_update = false,
@@ -118,7 +120,13 @@ local do_install = function(p, version, on_close)
     end)
   end
   table.insert(installed_packages, p.name)
-  p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
+  if IS_V1 then
+    p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
+  else
+    if not p:is_installing() then
+      p:install({ version = version }, vim.schedule_wrap(on_close))
+    end
+  end
 end
 
 local check_install = function(force_update, sync)
@@ -155,9 +163,51 @@ local check_install = function(force_update, sync)
       else
         name = item
       end
-
-      if condition ~= nil and not condition() then
-        vim.schedule(on_close)
+      if mlsp then
+        name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+      end
+      local p = mr.get_package(name)
+      if p:is_installed() then
+        if version ~= nil then
+          if IS_V1 then
+            p:get_installed_version(function(ok, installed_version)
+              if ok and installed_version ~= version then
+                do_install(p, version, on_close)
+              else
+                vim.schedule(on_close)
+              end
+            end)
+          else
+            local installed_version = p:get_installed_version()
+            if installed_version ~= version then
+              do_install(p, version, on_close)
+            else
+              vim.schedule(on_close)
+            end
+          end
+        elseif
+          force_update or (force_update == nil and (auto_update or (auto_update == nil and SETTINGS.auto_update)))
+        then
+          if IS_V1 then
+            p:check_new_version(function(ok, version_info)
+              if ok then
+                do_install(p, version_info.latest_version, on_close)
+              else
+                vim.schedule(on_close)
+              end
+            end)
+          else
+            local latest_version = p:get_latest_version()
+            local installed_version = p:get_installed_version()
+            if latest_version ~= installed_version then
+              do_install(p, latest_version, on_close)
+            else
+              vim.schedule(on_close)
+            end
+          end
+        else
+          vim.schedule(on_close)
+        end
       else
         if mlsp then
           name = mlsp.get_mappings().lspconfig_to_mason[name] or name
