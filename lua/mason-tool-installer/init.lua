@@ -166,6 +166,12 @@ local check_install = function(force_update, sync)
       if mlsp then
         name = mlsp.get_mappings().lspconfig_to_mason[name] or name
       end
+      if mnls then
+        name = mnls.getPackageFromNullLs(name) or name
+      end
+      if mdap then
+        name = mdap.nvim_dap_to_package[name] or name
+      end
       local p = mr.get_package(name)
       if p:is_installed() then
         if version ~= nil then
