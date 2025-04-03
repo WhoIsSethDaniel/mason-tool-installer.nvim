@@ -42,19 +42,19 @@ end
 
 local setup = function(settings)
   SETTINGS = vim.tbl_deep_extend('force', SETTINGS, settings)
-  for key, value in pairs {
+  vim.validate {
     ensure_installed = { SETTINGS.ensure_installed, 'table', true },
     auto_update = { SETTINGS.auto_update, 'boolean', true },
     run_on_start = { SETTINGS.run_on_start, 'boolean', true },
     start_delay = { SETTINGS.start_delay, 'number', true },
     debounce_hours = { SETTINGS.debounce_hours, 'number', true },
     integrations = { SETTINGS.integrations, 'table', true },
+  }
+  vim.validate {
     ['mason-lspconfig'] = { SETTINGS.integrations['mason-lspconfig'], 'boolean', true },
     ['mason-null-ls'] = { SETTINGS.integrations['mason-null-ls'], 'boolean', true },
     ['mason-nvim-dap'] = { SETTINGS.integrations['mason-nvim-dap'], 'boolean', true },
-  } do
-    vim.validate(key, value[1], value[2], value[3])
-  end
+  }
   setup_integrations()
 end
 
