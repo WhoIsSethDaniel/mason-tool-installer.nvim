@@ -172,7 +172,11 @@ local check_install = function(force_update, sync)
         vim.schedule(on_close)
       else
         if mlsp then
-          name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+          if IS_V1 then
+            name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+          else
+            name = mlsp.get_mappings().lspconfig_to_package[name] or name
+          end
         end
         if mnls then
           name = mnls.getPackageFromNullLs(name) or name
@@ -224,7 +228,11 @@ local check_install = function(force_update, sync)
           end
         else
           if mlsp then
-            name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+            if IS_V1 then
+              name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+            else
+              name = mlsp.get_mappings().lspconfig_to_package[name] or name
+            end
           end
           if mnls then
             name = mnls.getPackageFromNullLs(name) or name
