@@ -303,7 +303,11 @@ local clean = function()
       name = item
     end
     if mlsp then
-      name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+      if IS_V1 then
+        name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+      else
+        name = mlsp.get_mappings().lspconfig_to_package[name] or name
+      end
     end
     table.insert(expected, name)
   end
