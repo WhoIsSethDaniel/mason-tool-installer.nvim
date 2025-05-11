@@ -134,6 +134,27 @@ local do_install = function(p, version, on_close)
   end
 end
 
+local mlsp_get_mappings_cache
+local map_name = function(name)
+  if mlsp then
+    if IS_V1 then
+      name = mlsp.get_mappings().lspconfig_to_mason[name] or name
+    elseif mlsp_get_mappings_cache then
+      name = mlsp_get_mappings_cache.lspconfig_to_package[name] or name
+    else
+      mlsp_get_mappings_cache = mlsp.get_mappings()
+      name = mlsp_get_mappings_cache.lspconfig_to_package[name] or name
+    end
+  end
+  if mnls then
+    name = mnls.getPackageFromNullLs(name) or name
+  end
+  if mdap then
+    name = mdap.nvim_dap_to_package[name] or name
+  end
+  return name
+end
+
 local check_install = function(force_update, sync)
   sync = sync or false
   if not force_update and SETTINGS.debounce_hours ~= nil and not can_run(SETTINGS.debounce_hours) then
@@ -171,19 +192,7 @@ local check_install = function(force_update, sync)
       if condition ~= nil and not condition() then
         vim.schedule(on_close)
       else
-        if mlsp then
-          if IS_V1 then
-            name = mlsp.get_mappings().lspconfig_to_mason[name] or name
-          else
-            name = mlsp.get_mappings().lspconfig_to_package[name] or name
-          end
-        end
-        if mnls then
-          name = mnls.getPackageFromNullLs(name) or name
-        end
-        if mdap then
-          name = mdap.nvim_dap_to_package[name] or name
-        end
+        name = map_name(name)
         local p = mr.get_package(name)
         if p:is_installed() then
           if version ~= nil then
@@ -227,19 +236,7 @@ local check_install = function(force_update, sync)
             vim.schedule(on_close)
           end
         else
-          if mlsp then
-            if IS_V1 then
-              name = mlsp.get_mappings().lspconfig_to_mason[name] or name
-            else
-              name = mlsp.get_mappings().lspconfig_to_package[name] or name
-            end
-          end
-          if mnls then
-            name = mnls.getPackageFromNullLs(name) or name
-          end
-          if mdap then
-            name = mdap.nvim_dap_to_package[name] or name
-          end
+          name = map_name(name)
           local p = mr.get_package(name)
           if p:is_installed() then
             if version ~= nil then
