@@ -63,7 +63,7 @@ require('mason-tool-installer').setup {
     { 'bash-language-server', auto_update = true },
 
     -- you can do conditional installing
-    { 'gopls', condition = function() return not os.execute("go version") end },
+    { 'gopls', condition = function() return vim.fn.executable('go') == 1  end },
     'lua-language-server',
     'vim-language-server',
     'stylua',
