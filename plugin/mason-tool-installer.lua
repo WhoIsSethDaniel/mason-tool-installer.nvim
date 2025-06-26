@@ -1,5 +1,9 @@
 vim.api.nvim_create_autocmd({ 'VimEnter' }, {
-  callback = require('mason-tool-installer').run_on_start,
+  group = vim.api.nvim_create_augroup('mti_start', {}),
+  callback = function()
+    vim.api.nvim_del_augroup_by_name 'mti_start'
+    require('mason-tool-installer').run_on_start()
+  end,
 })
 vim.api.nvim_create_user_command('MasonToolsUpdate', function()
   require('mason-tool-installer').check_install(true)
