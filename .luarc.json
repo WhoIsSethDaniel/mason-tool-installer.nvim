@@ -1,8 +1,13 @@
 {
-  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
-  "workspace": {
-    "library": [
-      "$VIMRUNTIME",
-    ]
-  }
+    "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+    "Lua.diagnostics.globals": [
+        "vim"
+    ],
+    "workspace": {
+        "library": [
+            "$VIMRUNTIME",
+            "~/.local/share/nvim-data/lazy/mason.nvim/lua",
+            "~/.local/share/nvim-data/lazy/mason-lspconfig.nvim/lua"
+        ]
+    }
 }
