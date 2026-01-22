@@ -62,8 +62,12 @@ require('mason-tool-installer').setup {
     -- you can turn off/on auto_update per tool
     { 'bash-language-server', auto_update = true },
 
+    -- you can set a specific arch, helpful if you have a win_arm64 processor.
+    { 'terraformls', target = "win_arm64" },
+    { 'lua_ls', target = "win_x64" },
+
     -- you can do conditional installing
-    { 'gopls', condition = function() return vim.fn.executable('go') == 1  end },
+    { 'gopls', condition = function() return vim.fn.executable('go') == 1 end },
     'lua-language-server',
     'vim-language-server',
     'stylua',

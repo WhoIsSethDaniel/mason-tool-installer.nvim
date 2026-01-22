@@ -1,9 +1,35 @@
+---@module "mason-registry"
 local mr = require 'mason-registry'
 
 local mlsp, mnls, mdap
 
-local IS_V1 = require('mason.version').MAJOR_VERSION == 1
+---@module "mason.version"
+local mason_version = require 'mason.version'
 
+---@type number
+local major_version = mason_version.MAJOR_VERSION
+
+---@type boolean
+local IS_V1 = major_version == 1
+
+---@alias MasonToolOptions { ['auto_update']?: boolean, ['version']?: string, ['condition']?: fun(): boolean }
+---@alias PkgOptsWithMasonToolOpts PackageInstallOpts | MasonToolOptions
+---@alias MasonToolEntry string | PkgOptsWithMasonToolOpts
+
+---@class MasonToolInstallerSettings
+---@field ensure_installed MasonToolEntry[] List of tools to install
+---@field auto_update? boolean Auto-update installed tools
+---@field run_on_start? boolean Run installation check on start
+---@field start_delay? number Delay in ms before running on start
+---@field debounce_hours? number Hours to wait before re-running
+---@field integrations? MasonToolInstallerIntegrations Integration settings
+
+---@class MasonToolInstallerIntegrations
+---@field ["mason-lspconfig"]? boolean Enable mason-lspconfig integration
+---@field ["mason-null-ls"]? boolean Enable mason-null-ls integration
+---@field ["mason-nvim-dap"]? boolean Enable mason-nvim-dap integration
+
+---@type MasonToolInstallerSettings
 local SETTINGS = {
   ensure_installed = {},
   auto_update = false,
@@ -21,6 +47,7 @@ local setup_integrations = function()
   if SETTINGS.integrations['mason-lspconfig'] then
     local ok_mlsp, mlsp_mod = pcall(require, 'mason-lspconfig')
     if ok_mlsp then
+      ---@module "mason-lspconfig"
       mlsp = mlsp_mod
     end
   end
@@ -28,6 +55,7 @@ local setup_integrations = function()
   if SETTINGS.integrations['mason-null-ls'] then
     local ok_mnls, mnls_mod = pcall(require, 'mason-null-ls.mappings.source')
     if ok_mnls then
+      ---@module "mason-null-ls.mappings.source"
       mnls = mnls_mod
     end
   end
@@ -35,14 +63,17 @@ local setup_integrations = function()
   if SETTINGS.integrations['mason-nvim-dap'] then
     local ok_mdap, mdap_mod = pcall(require, 'mason-nvim-dap.mappings.source')
     if ok_mdap then
+      ---@module "mason-nvim-dap.mappings.source"
       mdap = mdap_mod
     end
   end
 end
 
+---@param settings MasonToolInstallerSettings
 local setup = function(settings)
   SETTINGS = vim.tbl_deep_extend('force', SETTINGS, settings)
-  validators = {
+  ---@type {}
+  local validators = {
     ensure_installed = { SETTINGS.ensure_installed, 'table', true },
     auto_update = { SETTINGS.auto_update, 'boolean', true },
     run_on_start = { SETTINGS.run_on_start, 'boolean', true },
@@ -94,17 +125,23 @@ local can_run = function(hours)
   return false
 end
 
+---@param msg string
 local show = vim.schedule_wrap(function(msg)
   vim.notify(msg, vim.log.levels.INFO, { title = 'mason-tool-installer' })
 end)
 
+---@param msg string
 local show_error = vim.schedule_wrap(function(msg)
   vim.notify(msg, vim.log.levels.ERROR, { title = 'mason-tool-installer' })
 end)
 
 local installed = false
 local installed_packages = {}
-local do_install = function(p, version, on_close)
+---@param p Package
+---@param opts PackageInstallOpts
+---@param on_close fun(): boolean The function returns a boolean
+local do_install = function(p, opts, on_close)
+  local version = opts.version
   if version ~= nil then
     show(string.format('%s: updating to %s', p.name, version))
   else
@@ -126,10 +163,10 @@ local do_install = function(p, version, on_close)
   end
   table.insert(installed_packages, p.name)
   if IS_V1 then
-    p:install({ version = version }):once('closed', vim.schedule_wrap(on_close))
+    p:install(opts):once('closed', vim.schedule_wrap(on_close))
   else
     if not p:is_installing() then
-      p:install({ version = version }, vim.schedule_wrap(on_close))
+      p:install(opts, vim.schedule_wrap(on_close))
     end
   end
 end
@@ -165,6 +202,8 @@ local check_install = function(force_update, sync)
   local completed = 0
   local total = vim.tbl_count(SETTINGS.ensure_installed)
   local all_completed = false
+
+  ---@type fun()
   local on_close = function()
     completed = completed + 1
     if completed >= total then
@@ -178,17 +217,51 @@ local check_install = function(force_update, sync)
       all_completed = true
     end
   end
+
+  ---@type fun()
   local ensure_installed = function()
-    for _, item in ipairs(SETTINGS.ensure_installed or {}) do
-      local name, version, auto_update, condition
+    for _, item in pairs(SETTINGS.ensure_installed) do
+      ---@type PackageInstallOpts
+      local opts = {}
+      ---@type string
+      local name
+      ---@type string
+      local version
+      ---@type boolean
+      local auto_update
+      ---@type fun(): boolean
+      local condition
+
       if type(item) == 'table' then
         name = item[1]
         version = item.version
         auto_update = item.auto_update
         condition = item.condition
+        opts = vim.tbl_extend('force', opts, item)
+
+        local package_install_options = { 'version', 'debug', 'target', 'force', 'strict', 'location' }
+
+        local allow = {}
+        for _, k in ipairs(package_install_options) do
+          allow[k] = true
+        end
+
+        local function filter_keys(tbl, allowset)
+          local out = {}
+          for k, v in pairs(tbl) do
+            -- keep only string keys that are in the allow-list
+            if type(k) == 'string' and allowset[k] then
+              out[k] = v
+            end
+          end
+          return out
+        end
+
+        opts = filter_keys(opts, allow)
       else
         name = item
       end
+
       if condition ~= nil and not condition() then
         vim.schedule(on_close)
       else
@@ -199,7 +272,7 @@ local check_install = function(force_update, sync)
             if IS_V1 then
               p:get_installed_version(function(ok, installed_version)
                 if ok and installed_version ~= version then
-                  do_install(p, version, on_close)
+                  do_install(p, vim.tbl_extend('keep', { version = version }, opts), on_close)
                 else
                   vim.schedule(on_close)
                 end
@@ -207,7 +280,7 @@ local check_install = function(force_update, sync)
             else
               local installed_version = p:get_installed_version()
               if installed_version ~= version then
-                do_install(p, version, on_close)
+                do_install(p, vim.tbl_extend('keep', { version = version }, opts), on_close)
               else
                 vim.schedule(on_close)
               end
@@ -218,7 +291,7 @@ local check_install = function(force_update, sync)
             if IS_V1 then
               p:check_new_version(function(ok, version_info)
                 if ok then
-                  do_install(p, version_info.latest_version, on_close)
+                  do_install(p, vim.tbl_extend('keep', version_info, opts), on_close)
                 else
                   vim.schedule(on_close)
                 end
@@ -227,7 +300,7 @@ local check_install = function(force_update, sync)
               local latest_version = p:get_latest_version()
               local installed_version = p:get_installed_version()
               if latest_version ~= installed_version then
-                do_install(p, latest_version, on_close)
+                do_install(p, vim.tbl_extend('keep', { version = latest_version }, opts), on_close)
               else
                 vim.schedule(on_close)
               end
@@ -242,7 +315,7 @@ local check_install = function(force_update, sync)
             if version ~= nil then
               p:get_installed_version(function(ok, installed_version)
                 if ok and installed_version ~= version then
-                  do_install(p, version, on_close)
+                  do_install(p, opts, on_close)
                 else
                   vim.schedule(on_close)
                 end
@@ -252,7 +325,7 @@ local check_install = function(force_update, sync)
             then
               p:check_new_version(function(ok, version)
                 if ok then
-                  do_install(p, version.latest_version, on_close)
+                  do_install(p, opts, on_close)
                 else
                   vim.schedule(on_close)
                 end
@@ -261,17 +334,19 @@ local check_install = function(force_update, sync)
               vim.schedule(on_close)
             end
           else
-            do_install(p, version, on_close)
+            do_install(p, opts, on_close)
           end
         end
       end
     end
   end
+
   if mr.refresh then
     mr.refresh(ensure_installed)
   else
     ensure_installed()
   end
+
   if sync then
     while true do
       vim.wait(10000, function()
